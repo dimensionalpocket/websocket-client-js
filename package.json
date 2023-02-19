@@ -1,0 +1,42 @@
+{
+  "name": "@dimensionalpocket/websocket-client",
+  "version": "0.1.0",
+  "description": "An opinionated WebSocket client that internally uses the browser's `WebSocket` global.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run lint && NODE_ENV=test c8 mocha",
+    "lint": "standardx --fix --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dimensionalpocket/websocket-client-js.git"
+  },
+  "author": "dimensionalpocket.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dimensionalpocket/websocket-client-js/issues"
+  },
+  "homepage": "https://github.com/dimensionalpocket/websocket-client-js#readme",
+  "devDependencies": {
+    "@dimensionalpocket/development": "github:dimensionalpocket/development-js#1.2.0"
+  },
+  "babel": {
+    "extends": "./node_modules/@dimensionalpocket/development/babel"
+  },
+  "eslintConfig": {
+    "extends": "./node_modules/@dimensionalpocket/development/eslint"
+  },
+  "mocha": {
+    "recursive": true,
+    "reporter": "dot",
+    "colors": true
+  },
+  "c8": {
+    "extends": "./node_modules/@dimensionalpocket/development/c8/default.json",
+    "include": [
+      "index.js",
+      "src"
+    ]
+  }
+}
