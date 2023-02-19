@@ -5,7 +5,7 @@ export class WebsocketClient extends EventEmitter {
   /**
    * @param {object} [options]
    * @param {string} [options.host] - Defaults to "localhost"
-   * @param {number} [options.port] - Defaults to 80
+   * @param {?number} [options.port] - Defaults to null (no port in server URL)
    * @param {string} [options.websocketPath] - Defaults to "/server"
    * @param {string} [options.httpPath] - Defaults to "/"
    * @param {boolean} [options.secure] - When not provided, will try to auto-detect based on window.location.protocol
@@ -18,16 +18,12 @@ export class WebsocketClient extends EventEmitter {
      */
     this.host = options?.host || 'localhost'
 
-    const port = options?.port
-
     /**
-     * Port number.
-     * When explicitly set to `null`, will omit the port from the URL.
-     * When undefined, will use default value.
+     * Port number. When not set, will omit the port to the URL.
      *
-     * @type {number|null}
+     * @type {?number}
      */
-    this.port = (port === undefined) ? 80 : port
+    this.port = options?.port || null
 
     /**
      * @type {string}
@@ -138,13 +134,13 @@ export class WebsocketClient extends EventEmitter {
 
   getWebsocketUrl () {
     const protocol = this.secure ? 'wss' : 'ws'
-    const port = (this.port !== 80) ? `:${this.port}` : ''
+    const port = (this.port !== null) ? `:${this.port}` : ''
     return `${protocol}://${this.host}${port}${this.websocketPath}`
   }
 
   getHttpUrl () {
     const protocol = this.secure ? 'https' : 'http'
-    const port = (this.port !== 80) ? `:${this.port}` : ''
+    const port = (this.port !== null) ? `:${this.port}` : ''
     return `${protocol}://${this.host}${port}${this.httpPath}`
   }
 
