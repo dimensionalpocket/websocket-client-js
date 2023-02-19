@@ -18,10 +18,16 @@ export class WebsocketClient extends EventEmitter {
      */
     this.host = options?.host || 'localhost'
 
+    const port = options?.port
+
     /**
-     * @type {number}
+     * Port number.
+     * When explicitly set to `null`, will omit the port from the URL.
+     * When undefined, will use default value.
+     *
+     * @type {number|null}
      */
-    this.port = options?.port || 80
+    this.port = (port === undefined) ? 80 : port
 
     /**
      * @type {string}
