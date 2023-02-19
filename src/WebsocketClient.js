@@ -8,7 +8,7 @@ export class WebsocketClient extends EventEmitter {
    * @param {number} [options.port] - Defaults to 80
    * @param {string} [options.websocketPath] - Defaults to "/server"
    * @param {string} [options.httpPath] - Defaults to "/"
-   * @param {boolean} [options.secure] - When not provided, will try to auto-detect based on window.location
+   * @param {boolean} [options.secure] - When not provided, will try to auto-detect based on window.location.protocol
    */
   constructor (options = undefined) {
     super()
@@ -39,8 +39,8 @@ export class WebsocketClient extends EventEmitter {
     this.secure = options?.secure ?? detectSecure()
 
     /**
-     * Current WebSocket.
-     * Will only be set for non-closed websocket states.
+     * Current websocket.
+     * Will only be present for non-closed socket states.
      *
      * @type {?WebSocket}
      */
@@ -55,19 +55,23 @@ export class WebsocketClient extends EventEmitter {
 
   /**
    * @async
-   * Connects to the websocket.
+   * Connects to the websocket server.
    *
-   * @returns {boolean|Promise<boolean>} -  `true` if connection is successful.
+   * @returns {Promise<boolean>} - `true` if connection is successful,
+   *                               `false` if already connected,
+   *                               Promise rejection on errors.
    */
   connect () {
     if (this.socket) {
       console.error('WebsocketClient#connect: already connected')
-      return false
+      return Promise.resolve(false)
     }
 
     return new Promise((resolve, reject) => {
+      // Create two temporary one-time listeners to fulfill the Promise.
+      // If any of them is called, remove the other one.
       const successFn = () => {
-        this.removeListener('error', failureFn, this, true)
+        this.removeListener('disconnect', failureFn, this, true)
         resolve(true)
       }
 
@@ -77,7 +81,7 @@ export class WebsocketClient extends EventEmitter {
       }
 
       this.once('connect', successFn, this)
-      this.once('error', failureFn, this)
+      this.once('disconnect', failureFn, this)
 
       this.socket = this.createSocket()
     })
@@ -85,6 +89,9 @@ export class WebsocketClient extends EventEmitter {
 
   createSocket () {
     const socket = new WebSocket(this.getWebsocketUrl())
+
+    // Default is "blob", but we want an ArrayBuffer instead.
+    socket.binaryType = 'arraybuffer'
 
     socket.addEventListener('open', this._onWebsocketOpen)
     socket.addEventListener('message', this._onWebsocketMessage)
@@ -96,7 +103,7 @@ export class WebsocketClient extends EventEmitter {
 
   /**
    * Destroys current closed socket.
-   * Automatically called when socket is closed or fails to connect.
+   * Automatically called when socket is closed.
    *
    * @returns {boolean} `true` if the existing socket was destroyed.
    */
@@ -125,43 +132,54 @@ export class WebsocketClient extends EventEmitter {
 
   getWebsocketUrl () {
     const protocol = this.secure ? 'wss' : 'ws'
-    const port = this.port !== 80 ? `:${this.port}` : ''
+    const port = (this.port !== 80) ? `:${this.port}` : ''
     return `${protocol}://${this.host}${port}${this.websocketPath}`
   }
 
   getHttpUrl () {
     const protocol = this.secure ? 'https' : 'http'
-    const port = this.port !== 80 ? `:${this.port}` : ''
+    const port = (this.port !== 80) ? `:${this.port}` : ''
     return `${protocol}://${this.host}${port}${this.httpPath}`
   }
 
   /**
+   * Called when the socket is connected successfully.
+   *
    * @param {Event} event
    */
   onWebsocketOpen (event) {
-    this.emit('connect', event, this)
+    this.emit('connect', this, event)
   }
 
   /**
+   * Called when the socket receives a message.
+   *
    * @param {MessageEvent} event
    */
   onWebsocketMessage (event) {
-    this.emit('message', event.data, event, this)
+    const data = event.data
+    const isBinary = !!(data instanceof ArrayBuffer)
+
+    this.emit('message', data, isBinary, this, event)
   }
 
   /**
-   * @param {Event} event
+   * Called when the socket is closed.
+   *
+   * @param {CloseEvent} event
    */
   onWebsocketClose (event) {
     this.destroySocket()
-    this.emit('disconnect', event, this)
+    this.emit('disconnect', event.code, event.reason, this, event)
   }
 
   /**
+   * Called when an error happens in the socket.
+   * It may or may not be an error that will cause a disconnect.
+   *
    * @param {Event} event
    */
   onWebsocketError (event) {
-    this.destroySocket()
-    this.emit('error', event, this)
+    this.emit('error', this, event)
   }
 }
