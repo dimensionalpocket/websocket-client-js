@@ -2,6 +2,13 @@
 
 An opinionated WebSocket client that internally uses the browser's `WebSocket` global.
 
+It is tailored to connect to servers running [@dimensionalpocket/websocket-server-js](https://github.com/dimensionalpocket/websocket-server-js), having the following expectations:
+
+- The websocket server is running at the `/server` endpoint.
+- There is an HTTP endpoint at `/` with a simple status page.
+
+The client will default to the above values, but they can be customized during initialization.
+
 ## Features
 
 - Can be initialized without trying to connect to the server.
@@ -14,14 +21,10 @@ import { WebsocketClient } from '@dimensionalpocket/websocket-client'
 
 // Initializes a client, without connecting yet
 const websocketClient = new WebsocketClient({
-  // A full url can be provided.
-  url: "ws://localhost:8080/server",
-  
-  // When a url is not provided,
-  // connection data can be provided separately.
   host: "localhost",
-  port: 8080,
-  path: "/server",
+  port: 80,
+  websocketPath: "/server",
+  httpPath: "/",
   
   // to use wss:// instead of ws://
   // if `null`, will try to auto-detect based on window.location
@@ -47,6 +50,7 @@ websocketClient.on('message', (message, isBinary, client) => {
 // Disconnection codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
 websocketClient.on('disconnect', (event, client) => {
   console.log('Disconnected', event.code, event.reason)
+  // you can call client.connect() here to reconnect based on event.code
 })
 
 // Called when the client disconnects due to an error.
@@ -55,7 +59,7 @@ websocketClient.on('error', (event, client) => {
 })
 
 // Connects to the server.
-// This method is async, returning self after it connects successfully.
+// This method is async, returning a boolean based on connection success.
 await websocketClient.connect()
 
 // Sends a string to the server.
@@ -65,14 +69,14 @@ websocketClient.send('string')
 // It will be transformed into a JSON string.
 websocketClient.sendObject({my: "object"})
 
-// Disconnects from the server. Does not trigger reconnects.
+// Disconnects from the websocket server. Does not trigger reconnects.
 // The client can be reused afterwards.
 websocketClient.disconnect()
 ```
 
 ## Usage in Node
 
-This package reads from a `WebSocket` global variable. If the code is running in a browser, the native implementation will be used. 
+This implementation reads from a `WebSocket` global variable. If the code is running in a browser, the native implementation will be used.
 
 In Node environments, the global doesn't exist, so it must be created manually. This can be done with a package like [`isomorphic-ws`](https://github.com/heineiuo/isomorphic-ws):
 
@@ -88,7 +92,7 @@ import WebSocket from 'isomorphic-ws'
 globalThis.WebSocket = WebSocket
 ```
 
-Then require it once, before running Node scripts that use this library.
+Then require it once, before running Node scripts that use this library (which uses a similar strategy for its own tests).
 
 ## License
 

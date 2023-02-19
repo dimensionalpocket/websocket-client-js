@@ -19,7 +19,12 @@
   },
   "homepage": "https://github.com/dimensionalpocket/websocket-client-js#readme",
   "devDependencies": {
-    "@dimensionalpocket/development": "github:dimensionalpocket/development-js#1.2.0"
+    "@dimensionalpocket/development": "github:dimensionalpocket/development-js#1.2.0",
+    "isomorphic-ws": "5.0.0",
+    "ws": "8.12.1"
+  },
+  "standardx": {
+    "globals": ["WebSocket"]
   },
   "babel": {
     "extends": "./node_modules/@dimensionalpocket/development/babel"
@@ -30,7 +35,8 @@
   "mocha": {
     "recursive": true,
     "reporter": "dot",
-    "colors": true
+    "colors": true,
+    "require": "./test/support/globals.js"
   },
   "c8": {
     "extends": "./node_modules/@dimensionalpocket/development/c8/default.json",
@@ -38,5 +44,8 @@
       "index.js",
       "src"
     ]
+  },
+  "dependencies": {
+    "eventemitter3": "5.0.0"
   }
 }

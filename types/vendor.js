@@ -1,3 +1,3 @@
 /**
- * // typedef { import("uWebSockets.js").WebSocket<any> } uWS.WebSocket
+ * @typedef { import("isomorphic-ws") } WebSocket
  */
