@@ -18,6 +18,9 @@
     "url": "https://github.com/dimensionalpocket/websocket-client-js/issues"
   },
   "homepage": "https://github.com/dimensionalpocket/websocket-client-js#readme",
+  "dependencies": {
+    "eventemitter3": "5.0.0"
+  },
   "devDependencies": {
     "@dimensionalpocket/development": "github:dimensionalpocket/development-js#1.2.0",
     "isomorphic-ws": "5.0.0",
@@ -44,8 +47,5 @@
       "index.js",
       "src"
     ]
-  },
-  "dependencies": {
-    "eventemitter3": "5.0.0"
   }
 }

@@ -1,3 +1,3 @@
 /**
- * @typedef { import("isomorphic-ws") } WebSocket
+ * typedef { import("isomorphic-ws") } WebSocket
  */

@@ -19,38 +19,36 @@ The client will default to the above values, but they can be customized during i
 ```javascript
 import { WebsocketClient } from '@dimensionalpocket/websocket-client'
 
-// Initializes a client, without connecting yet
+// Initializes a client, without connecting yet.
+// All arguments are optional and have the defaults below.
 const websocketClient = new WebsocketClient({
   host: "localhost",
   port: 80,
   websocketPath: "/server",
   httpPath: "/",
-  
-  // to use wss:// instead of ws://
-  // if `null`, will try to auto-detect based on window.location
-  secure: false
+  secure: false // if not given, will try to auto-detect based on window.location.protocol
 })
 
-// Called when a connection is established, even after reconnects
-websocketClient.on('connect', (client) => {
+// Called whenever a connection is established, even after reconnects.
+websocketClient.on('connect', (event, client) => {
   // In this example, whenever the socket is connected,
   // send some authentication request
   console.log('Connected; authenticating...')
   client.sendObject(['authenticate', 'username', 'token'])
 })
 
-// Called when a message is received from the server
-websocketClient.on('message', (message, isBinary, client) => {
+// Called when a message is received from the server.
+websocketClient.on('message', (message, event, client) => {
   // If isBinary is true, message will be an ArrayBuffer
   // Otherwise a string
-  console.log('Received message from server', isBinary, message)
+  console.log('Received message from server', message)
 })
 
 // Called when the client disconnects.
 // Disconnection codes: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
 websocketClient.on('disconnect', (event, client) => {
   console.log('Disconnected', event.code, event.reason)
-  // you can call client.connect() here to reconnect based on event.code
+  // you can call client.connect() here to reconnect based on event.code, etc
 })
 
 // Called when the client disconnects due to an error.
@@ -63,13 +61,14 @@ websocketClient.on('error', (event, client) => {
 await websocketClient.connect()
 
 // Sends a string to the server.
-websocketClient.send('string')
+websocketClient.send('some string')
 
 // Sends an object to the server.
 // It will be transformed into a JSON string.
 websocketClient.sendObject({my: "object"})
 
-// Disconnects from the websocket server. Does not trigger reconnects.
+// Disconnects from the websocket server.
+// Does not trigger reconnects.
 // The client can be reused afterwards.
 websocketClient.disconnect()
 ```
@@ -78,13 +77,15 @@ websocketClient.disconnect()
 
 This implementation reads from a `WebSocket` global variable. If the code is running in a browser, the native implementation will be used.
 
-In Node environments, the global doesn't exist, so it must be created manually. This can be done with a package like [`isomorphic-ws`](https://github.com/heineiuo/isomorphic-ws):
+In Node environments, the global doesn't exist, so it must be created manually. 
+
+This can be done with a package like [`isomorphic-ws`](https://github.com/heineiuo/isomorphic-ws). First install it alongside `ws`:
 
 ```
 > npm i -D isomorphic-ws ws
 ```
 
-Then create a file to inject the `Websocket` variable in the global scope:
+Then create a file to inject the `WebSocket` variable in the global scope:
 
 ```javascript
 import WebSocket from 'isomorphic-ws'
@@ -92,7 +93,7 @@ import WebSocket from 'isomorphic-ws'
 globalThis.WebSocket = WebSocket
 ```
 
-Then require it once, before running Node scripts that use this library (which uses a similar strategy for its own tests).
+Finally, require the above file once, before running Node scripts/tests that use this library.
 
 ## License
 
