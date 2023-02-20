@@ -13,6 +13,17 @@ export function createClient (server, context) {
     console.log('Client', client.uuid, 'connected')
   })
 
+  // Upon connection, server will send a message with the connection UUID.
+  // We then set the client's UUID to match.
+  context.client.once('message', (/** @type {any} */ message, /** @type {boolean} */ _isBinary, /** @type {WebsocketClient} */ client, /** @type {MessageEvent} */ _event) => {
+    const json = JSON.parse(message)
+    if (json[0] === 'connection-uuid') {
+      const oldUuid = client.uuid
+      client.uuid = json[1]
+      console.log('Client UUID changed from', oldUuid, 'to', client.uuid)
+    }
+  })
+
   context.client.on('message', (/** @type {any} */ message, /** @type {boolean} */ isBinary, /** @type {WebsocketClient} */ client, /** @type {MessageEvent} */ _event) => {
     console.log('Client', client.uuid, 'message', message, isBinary)
   })
