@@ -67,10 +67,10 @@ websocketClient.send('some string')
 // Sends an object as a JSON string to the server.
 websocketClient.json({my: "object"})
 
-// Disconnects from the websocket server.
+// Disconnects from the websocket server with a (optional) code and reason.
 // Does not trigger reconnects.
 // The client can be reused afterwards.
-websocketClient.disconnect()
+websocketClient.disconnect(3000, 'Closed manually')
 ```
 
 ## The HTTP endpoint
@@ -83,7 +83,7 @@ To keep this library small, it does not provide such ping mechanisms (which woul
 
 This library expects a `WebSocket` global variable to exist. If the code is running in a browser, the native implementation will be used.
 
-In Node environments, that global doesn't exist, so it must be created manually.
+In Node environments, that global doesn't exist, so it must be injected manually.
 
 This can be done with a package like [`isomorphic-ws`](https://github.com/heineiuo/isomorphic-ws). First install it alongside `ws`:
 

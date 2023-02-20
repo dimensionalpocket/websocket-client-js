@@ -4,8 +4,7 @@
  * @returns {boolean}
  */
 export function detectSecure () {
-  // @ts-ignore
-  const window = globalThis.window
-  if (!window) return false
-  return window.location.protocol === 'https:'
+  const w = globalThis.window
+  if (!w) return false
+  return w.location.protocol === 'https:'
 }

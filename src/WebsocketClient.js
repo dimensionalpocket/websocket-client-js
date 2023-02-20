@@ -1,4 +1,5 @@
 import EventEmitter from 'eventemitter3'
+import { v4 as uuidv4 } from 'uuid'
 import { detectSecure } from './utils/detect-secure.js'
 
 export class WebsocketClient extends EventEmitter {
@@ -12,6 +13,11 @@ export class WebsocketClient extends EventEmitter {
    */
   constructor (options = undefined) {
     super()
+
+    /**
+     * @type {string}
+     */
+    this.uuid = uuidv4()
 
     /**
      * @type {string}
@@ -87,6 +93,34 @@ export class WebsocketClient extends EventEmitter {
 
       this.socket = this.createSocket()
     })
+  }
+
+  disconnect (code = 3000, reason = 'Manual closure') {
+    this.socket?.close(code, reason)
+  }
+
+  /**
+   * Sends a message to the server.
+   *
+   * @param {string|ArrayBuffer} message
+   *
+   * @returns {boolean}
+   */
+  send (message) {
+    const socket = this.socket
+    if (!socket) return false
+
+    socket.send(message)
+    return true
+  }
+
+  /**
+   * Sends an object to the server as a JSON string.
+   *
+   * @param {object} object
+   */
+  json (object) {
+    return this.send(JSON.stringify(object))
   }
 
   createSocket () {
