@@ -20,7 +20,7 @@
   "homepage": "https://github.com/dimensionalpocket/websocket-client-js#readme",
   "dependencies": {
     "eventemitter3": "5.0.0",
-    "uuid": "9.0.0"
+    "uuid": "14.0.2"
   },
   "devDependencies": {
     "@dimensionalpocket/development": "github:dimensionalpocket/development-js#1.2.0",
